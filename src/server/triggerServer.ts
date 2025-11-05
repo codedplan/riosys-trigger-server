@@ -38,6 +38,6 @@ app.post("/trigger/render", async (req: any, res: any) => {
   }
 });
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`🚀 Trigger server listening on port ${PORT}`);
 });
