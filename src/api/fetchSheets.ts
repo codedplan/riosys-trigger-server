@@ -7,6 +7,7 @@
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { google } from "googleapis";
 
 interface SheetConfig {
@@ -29,29 +30,69 @@ const OUTPUT_DIR = path.resolve(process.cwd(), "data/sheets");
 if (!SPREADSHEET_ID) {
   throw new Error("환경변수 GOOGLE_SHEET_ID가 누락되었습니다.");
 }
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64) {
-  throw new Error("환경변수 GOOGLE_APPLICATION_CREDENTIALS_BASE64가 누락되었습니다.");
+
+// ✅ 키는 Base64 또는 JSON 원문 중 하나만 쓰게 합니다.
+const base64Env = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
+const jsonEnv   = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+
+if (!base64Env && !jsonEnv) {
+  throw new Error("환경변수 GOOGLE_APPLICATION_CREDENTIALS_BASE64 또는 GOOGLE_APPLICATION_CREDENTIALS_JSON 가 필요합니다.");
+}
+
+// ✅ 키 파싱 + 개행/이스케이프 정규화
+function loadCredentials() {
+  let raw: string;
+
+  if (base64Env) {
+    raw = Buffer.from(base64Env, "base64").toString("utf-8");
+  } else {
+    raw = jsonEnv!;
+  }
+
+  const obj = JSON.parse(raw);
+
+  // private_key 정규화: \\n → \n, CRLF → \n, 앞뒤 공백 제거
+  if (typeof obj.private_key === "string") {
+    obj.private_key = obj.private_key
+      .replace(/\\n/g, "\n")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .trim();
+  }
+
+  if (
+    !obj.client_email ||
+    !obj.private_key ||
+    !obj.private_key.includes("BEGIN") ||
+    !obj.private_key.includes("PRIVATE KEY")
+  ) {
+    throw new Error("서비스 계정 키 형식이 올바르지 않습니다. client_email / private_key 를 확인하세요.");
+  }
+
+  return obj;
 }
 
 async function fetchSheets() {
   try {
-    // ✅ 1️⃣ Render 환경용 Base64 키 디코딩
-    const base64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64!;
-    const decoded = Buffer.from(base64, "base64").toString("utf-8");
-    const credentials = JSON.parse(decoded);
+    const credentials = loadCredentials();
 
-    // ✅ 2️⃣ Google 인증 생성 (파일 경로가 아닌 credentials 직접 주입)
-    const auth = new google.auth.GoogleAuth({
-      credentials,
+    // ✅ JWT 클라이언트로 직접 인증(파일 경로/ADC 미사용)
+    const jwt = new google.auth.JWT({
+      email: credentials.client_email,
+      key: credentials.private_key,
       scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
     });
 
-    const sheets = google.sheets({ version: "v4", auth });
+    const sheets = google.sheets({ version: "v4", auth: jwt });
 
-    // ✅ 출력 폴더 없으면 생성
+    // (선택) OpenSSL 문제 회피용: 임시 파일로 키를 내려 쓰고 GOOGLE_APPLICATION_CREDENTIALS 설정
+    // 일부 런타임에서 PEM 파서가 문자열보다 파일 경로를 더 안정적으로 처리하는 경우가 있습니다.
+    const tmpKeyPath = path.join(os.tmpdir(), "gsa-key.json");
+    fs.writeFileSync(tmpKeyPath, JSON.stringify(credentials));
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpKeyPath;
+
     if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-    // ✅ 3️⃣ 시트별 데이터 요청
     for (const sheet of SHEETS) {
       console.log(`📥 시트 요청 중: ${sheet.name}`);
 
@@ -67,7 +108,6 @@ async function fetchSheets() {
         return obj;
       });
 
-      // ✅ JSON 파일 저장
       fs.writeFileSync(
         path.join(OUTPUT_DIR, sheet.output),
         JSON.stringify(json, null, 2),
@@ -79,7 +119,15 @@ async function fetchSheets() {
 
     console.log("🎉 모든 시트 데이터가 성공적으로 저장되었습니다.");
   } catch (err: any) {
-    console.error("❌ fetchSheets 오류:", err);
+    // 에러 유형별 힌트
+    const msg = String(err && err.message ? err.message : err);
+    if (msg.includes("invalid_grant")) {
+      console.error("❌ fetchSheets 오류: invalid_grant (JWT 서명을 검증하지 못함) — 대부분 private_key 개행/이스케이프 또는 키 손상/불일치 문제입니다.");
+    } else if (msg.includes("ERR_OSSL_UNSUPPORTED") || msg.includes("DECODER routines::unsupported")) {
+      console.error("❌ fetchSheets 오류: OpenSSL 디코더가 키를 해석하지 못함 — 키 포맷/개행 또는 런타임/라이브러리 호환 이슈입니다.");
+    } else {
+      console.error("❌ fetchSheets 오류:", err);
+    }
     process.exit(1);
   }
 }
