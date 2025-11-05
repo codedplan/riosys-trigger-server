@@ -33,13 +33,22 @@ app.post("/trigger", async (req: any, res: any) => {
     console.log("▶ 자동화 파이프라인 시작...");
 
     console.log("→ 1️⃣ fetchSheets 실행 중...");
-    execSync("node dist/api/fetchSheets.js", { stdio: "inherit" });
+    execSync("node --openssl-legacy-provider dist/api/fetchSheets.js", {
+      stdio: "inherit",
+      env: { ...process.env, NODE_OPTIONS: "--openssl-legacy-provider" }
+    });
 
     console.log("→ 2️⃣ mergeBySKU 실행 중...");
-    execSync("node dist/mergeBySKU.js", { stdio: "inherit" });
+    execSync("node --openssl-legacy-provider dist/mergeBySKU.js", {
+      stdio: "inherit",
+      env: { ...process.env, NODE_OPTIONS: "--openssl-legacy-provider" }
+    });
 
     console.log("→ 3️⃣ renderDataOverview 실행 중...");
-    execSync("node dist/render/renderDataOverview.js", { stdio: "inherit" });
+    execSync("node --openssl-legacy-provider dist/render/renderDataOverview.js", {
+      stdio: "inherit",
+      env: { ...process.env, NODE_OPTIONS: "--openssl-legacy-provider" }
+    });
 
     console.log("✅ 모든 단계 완료!");
     res.status(200).json({ status: "ok", message: "Pipeline complete" });
