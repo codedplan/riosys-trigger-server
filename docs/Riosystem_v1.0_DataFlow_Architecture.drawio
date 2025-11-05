@@ -1,0 +1,52 @@
+<mxfile host="65bd71144e">
+    <diagram id="Kg5MORtXLyOR31zPJZZj" name="Page-1">
+        <mxGraphModel dx="1808" dy="1139" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="5" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="2" target="4">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot; color=&quot;#000000&quot;&gt;&lt;b style=&quot;&quot;&gt;📄 Google Sheets (입력 데이터 허브)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;상품마스터 / 브랜드가이드 / 품종사전 / 스토리플롯&lt;/font&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E8;strokeColor=#D6C9A2;" vertex="1" parent="1">
+                    <mxGeometry x="95.75" y="40" width="404.25" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td data-start=&quot;795&quot; data-end=&quot;804&quot; data-col-size=&quot;sm&quot;&gt;&lt;strong data-start=&quot;797&quot; data-end=&quot;803&quot;&gt;&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td data-col-size=&quot;sm&quot; data-start=&quot;804&quot; data-end=&quot;826&quot;&gt;모든 입력 데이터가 출발하는 허브&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="50" width="210" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="4" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot; color=&quot;#000000&quot;&gt;&lt;b&gt;🧠 GPT Story Builder (AI 텍스트·프롬프트 생성)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;스토리라인 + 이미지 프롬프트 자동 생성&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;출력: storyline.json / image_prompt.json&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;fillColor=#E5F5EC;strokeColor=#B5D7B7;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="95.75" y="160" width="408.5" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="6" target="10">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot; color=&quot;#000000&quot;&gt;&lt;b&gt;🎨 Local Engine (ComfyUI)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;실사 + 연출컷 + 프롬프트 → 이미지 생성&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;ControlNet + IP-Adapter + SDXL&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;출력: 섹션별 이미지 / meta.json&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;fillColor=#EAF1FF;strokeColor=#A4BEEA;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="300" width="280" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td data-start=&quot;1233&quot; data-end=&quot;1242&quot; data-col-size=&quot;sm&quot;&gt;&lt;strong data-start=&quot;1235&quot; data-end=&quot;1241&quot;&gt;&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td data-col-size=&quot;sm&quot; data-start=&quot;1242&quot; data-end=&quot;1274&quot;&gt;스토리라인과 프롬프트 생성 단계 (AI 엔진 중심)&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="180" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="&lt;table data-start=&quot;1435&quot; data-end=&quot;1739&quot; class=&quot;w-fit min-w-(--thread-content-width)&quot;&gt;&lt;tbody data-start=&quot;1463&quot; data-end=&quot;1739&quot;&gt;&lt;tr data-start=&quot;1697&quot; data-end=&quot;1739&quot;&gt;&lt;td data-start=&quot;1697&quot; data-end=&quot;1706&quot; data-col-size=&quot;sm&quot;&gt;&lt;strong data-start=&quot;1699&quot; data-end=&quot;1705&quot;&gt;&lt;/strong&gt;&lt;/td&gt;&lt;td data-col-size=&quot;sm&quot; data-start=&quot;1706&quot; data-end=&quot;1739&quot;&gt;이미지 생성 엔진 — 시각 결과물을 만드는 핵심 단계&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="460" y="340" width="300" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="10" target="13">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot; color=&quot;#000000&quot;&gt;&lt;b&gt;🖼️ Figma Plugin (디자인 자동 배치)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;섹션별 텍스트·이미지 자동 매핑&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;브랜드가이드 톤 적용 / 후터치 수정 지원&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;fillColor=#F4E9FF;strokeColor=#CBB6E0;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="460" width="300" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td data-start=&quot;2043&quot; data-end=&quot;2052&quot; data-col-size=&quot;sm&quot;&gt;&lt;strong data-start=&quot;2045&quot; data-end=&quot;2051&quot;&gt;&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td data-col-size=&quot;sm&quot; data-start=&quot;2052&quot; data-end=&quot;2079&quot;&gt;AI 결과물이 디자인 구조로 전환되는 단계&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="460" y="475" width="240" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot; color=&quot;#000000&quot;&gt;&lt;b style=&quot;&quot;&gt;📦 Final Output &amp;amp; Version Management&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;출력: hero.png / usp1.png / meta.json / Figma 완성본&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#000000&quot;&gt;수동 버전 관리: v1, v2 폴더&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;fillColor=#FFF0F0;strokeColor=#E3B6B6;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="127.5" y="595" width="345" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="&lt;table data-start=&quot;2242&quot; data-end=&quot;2469&quot; class=&quot;w-fit min-w-(--thread-content-width)&quot;&gt;&lt;tbody data-start=&quot;2270&quot; data-end=&quot;2469&quot;&gt;&lt;tr data-start=&quot;2428&quot; data-end=&quot;2469&quot;&gt;&lt;td data-start=&quot;2428&quot; data-end=&quot;2437&quot; data-col-size=&quot;sm&quot;&gt;&lt;strong data-start=&quot;2430&quot; data-end=&quot;2436&quot;&gt;&lt;/strong&gt;&lt;/td&gt;&lt;td data-col-size=&quot;sm&quot; data-start=&quot;2437&quot; data-end=&quot;2469&quot;&gt;완성 산출물 및 버전 관리 구간 (수동 관리 영역)&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="490" y="620" width="280" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

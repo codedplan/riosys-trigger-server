@@ -1,0 +1,311 @@
+/* ======================================================================
+ * File: src/render/renderDataOverview.ts
+ * Purpose: dist/grouped_input.json을 검증·집계·시각화하여
+ *          dist/report/data_overview.html & .json & figma_render_queue.json 생성
+ * Author: Riosys Team
+ * Runtime: node:18+, ts-node or compiled js
+ * ====================================================================== */
+
+import fs from "node:fs";
+import path from "node:path";
+import { RiosysGroupedInput, RiosysGroupedRecord } from "../types/grouped";
+
+type KPI = {
+  total: number;
+  autoGen: number;
+  byBrand: Record<string, number>;
+  byVariety: Record<string, number>;
+  byStory: Record<string, number>;
+  missing: {
+    copyShort: number;
+    copyLong: number;
+    promptImage: number;
+    promptLayout: number;
+    refImages: number;
+    brandPalette: number;
+    logoRef: number;
+  };
+};
+
+type RenderQueueItem = {
+  SKU: string;
+  BrandCode: string;
+  StoryId: string;
+  layoutHint: string;
+  priority: number; // 결손 자산 있을수록 상향
+};
+
+const ROOT = process.cwd();
+const INPUT_JSON = path.join(ROOT, "dist", "grouped_input.json");
+const REPORT_DIR = path.join(ROOT, "dist", "report");
+const QUEUE_DIR = path.join(ROOT, "dist", "queues");
+const LOG_DIR = path.join(ROOT, "logs");
+
+function ensureDirs() {
+  [REPORT_DIR, QUEUE_DIR, LOG_DIR].forEach((d) => {
+    if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+  });
+}
+
+function loadInput(): RiosysGroupedInput {
+  if (!fs.existsSync(INPUT_JSON)) {
+    throw new Error(`grouped_input.json not found at ${INPUT_JSON}`);
+  }
+  const raw = fs.readFileSync(INPUT_JSON, "utf-8");
+  const parsed = JSON.parse(raw) as RiosysGroupedInput;
+
+  // 최소 유효성
+  if (!parsed.records || !Array.isArray(parsed.records)) {
+    throw new Error("Invalid grouped_input.json: 'records' must be array");
+  }
+  return parsed;
+}
+
+function validateRecord(rec: RiosysGroupedRecord): string[] {
+  const issues: string[] = [];
+  // 필수 필드
+  if (!rec.SKU) issues.push("SKU missing");
+  if (typeof rec.AutoGen !== "boolean") issues.push("AutoGen must be boolean");
+  if (!rec.BrandCode) issues.push("BrandCode missing");
+  if (!rec.VarietyCode) issues.push("VarietyCode missing");
+  if (!rec.StoryId) issues.push("StoryId missing");
+
+  // 자산/프롬프트 결손
+  if (!rec.Copy?.short?.trim()) issues.push("Copy.short missing");
+  if (!rec.Copy?.long?.trim()) issues.push("Copy.long missing");
+  if (!rec.Prompts?.image?.trim()) issues.push("Prompts.image missing");
+  if (!rec.Prompts?.layout?.trim()) issues.push("Prompts.layout missing");
+  if (!Array.isArray(rec.Assets?.refImages) || rec.Assets.refImages.length === 0)
+    issues.push("Assets.refImages missing");
+  if (!Array.isArray(rec.Assets?.brandPalette) || rec.Assets.brandPalette.length === 0)
+    issues.push("Assets.brandPalette missing");
+  if (!rec.Assets?.logoRef) issues.push("Assets.logoRef missing");
+
+  return issues;
+}
+
+function aggregateKPI(records: RiosysGroupedRecord[]): KPI {
+  const kpi: KPI = {
+    total: records.length,
+    autoGen: records.filter((r) => r.AutoGen === true).length,
+    byBrand: {},
+    byVariety: {},
+    byStory: {},
+    missing: {
+      copyShort: 0,
+      copyLong: 0,
+      promptImage: 0,
+      promptLayout: 0,
+      refImages: 0,
+      brandPalette: 0,
+      logoRef: 0,
+    },
+  };
+
+  for (const r of records) {
+    kpi.byBrand[r.BrandName || r.BrandCode] = (kpi.byBrand[r.BrandName || r.BrandCode] || 0) + 1;
+    kpi.byVariety[r.VarietyName || r.VarietyCode] =
+      (kpi.byVariety[r.VarietyName || r.VarietyCode] || 0) + 1;
+    kpi.byStory[r.StoryTitle || r.StoryId] = (kpi.byStory[r.StoryTitle || r.StoryId] || 0) + 1;
+
+    if (!r.Copy?.short?.trim()) kpi.missing.copyShort++;
+    if (!r.Copy?.long?.trim()) kpi.missing.copyLong++;
+    if (!r.Prompts?.image?.trim()) kpi.missing.promptImage++;
+    if (!r.Prompts?.layout?.trim()) kpi.missing.promptLayout++;
+    if (!Array.isArray(r.Assets?.refImages) || r.Assets.refImages.length === 0)
+      kpi.missing.refImages++;
+    if (!Array.isArray(r.Assets?.brandPalette) || r.Assets.brandPalette.length === 0)
+      kpi.missing.brandPalette++;
+    if (!r.Assets?.logoRef) kpi.missing.logoRef++;
+  }
+
+  return kpi;
+}
+
+function writeJson(filePath: string, data: unknown) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+}
+
+function toHtmlTable(rows: Array<Record<string, string | number>>) {
+  if (rows.length === 0) return "<p>데이터 없음</p>";
+  const headers = Object.keys(rows[0]);
+  const thead = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>`;
+  const tbody = `<tbody>${rows
+    .map(
+      (r) =>
+        `<tr>${headers
+          .map((h) => `<td>${String(r[h] ?? "").replace(/</g, "&lt;")}</td>`)
+          .join("")}</tr>`
+    )
+    .join("")}</tbody>`;
+  return `<table>${thead}${tbody}</table>`;
+}
+
+function renderHTML(kpi: KPI, issues: Array<{ SKU: string; issues: string[] }>, autoGenRows: RiosysGroupedRecord[]) {
+  const brandRows = Object.entries(kpi.byBrand).map(([k, v]) => ({ Brand: k, Count: v }));
+  const varietyRows = Object.entries(kpi.byVariety).map(([k, v]) => ({ Variety: k, Count: v }));
+  const storyRows = Object.entries(kpi.byStory).map(([k, v]) => ({ Story: k, Count: v }));
+
+  const autoGenTable = toHtmlTable(
+    autoGenRows.map((r) => ({
+      SKU: r.SKU,
+      Brand: r.BrandName || r.BrandCode,
+      Variety: r.VarietyName || r.VarietyCode,
+      Story: r.StoryTitle || r.StoryId,
+      Title: r.Title,
+    }))
+  );
+
+  const issueRows = issues.flatMap((i) => i.issues.map((msg) => ({ SKU: i.SKU, Issue: msg })));
+  const issuesTable = toHtmlTable(issueRows);
+
+  const brandTable = toHtmlTable(brandRows);
+  const varietyTable = toHtmlTable(varietyRows);
+  const storyTable = toHtmlTable(storyRows);
+
+  return `<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<title>Riosys Data Overview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+  body { font-family: ui-sans-serif, system-ui, -apple-system; margin: 24px; }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+  .card { border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+  table { width:100%; border-collapse: collapse; margin-top:8px; }
+  th, td { border:1px solid #e5e7eb; padding:8px; font-size: 12px; }
+  th { background:#f9fafb; text-align:left; }
+  .grid { display:grid; gap:16px; grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .muted { color:#6b7280; font-size:12px; }
+  .danger { color:#b91c1c; font-weight:600; }
+</style>
+</head>
+<body>
+  <h1>리오시스템_v1.0 · 데이터 오버뷰</h1>
+  <div class="muted">생성일: ${new Date().toISOString()}</div>
+
+  <section class="kpis" style="margin-top:12px;">
+    <div class="card"><div class="muted">총 레코드</div><div style="font-size:28px;">${kpi.total}</div></div>
+    <div class="card"><div class="muted">AUTO_GEN 대상</div><div style="font-size:28px;">${kpi.autoGen}</div></div>
+    <div class="card"><div class="muted">결손 자산(이미지/팔레트/로고)</div>
+      <div>refImages: <b class="${kpi.missing.refImages>0?"danger":""}">${kpi.missing.refImages}</b></div>
+      <div>brandPalette: <b class="${kpi.missing.brandPalette>0?"danger":""}">${kpi.missing.brandPalette}</b></div>
+      <div>logoRef: <b class="${kpi.missing.logoRef>0?"danger":""}">${kpi.missing.logoRef}</b></div>
+    </div>
+    <div class="card"><div class="muted">결손 카피/프롬프트</div>
+      <div>Copy.short: <b class="${kpi.missing.copyShort>0?"danger":""}">${kpi.missing.copyShort}</b></div>
+      <div>Copy.long: <b class="${kpi.missing.copyLong>0?"danger":""}">${kpi.missing.copyLong}</b></div>
+      <div>Prompt.image: <b class="${kpi.missing.promptImage>0?"danger":""}">${kpi.missing.promptImage}</b></div>
+      <div>Prompt.layout: <b class="${kpi.missing.promptLayout>0?"danger":""}">${kpi.missing.promptLayout}</b></div>
+    </div>
+  </section>
+
+  <section class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2>브랜드 분포</h2>
+      ${brandTable}
+    </div>
+    <div class="card">
+      <h2>품종 분포</h2>
+      ${varietyTable}
+    </div>
+    <div class="card">
+      <h2>스토리 플롯 분포</h2>
+      ${storyTable}
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <h2>AUTO_GEN 대상 목록</h2>
+    <div class="muted">※ Apps Script의 체크박스 → Boolean 변환 결과 반영</div>
+    ${autoGenTable}
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <h2>이슈 로그(결손/형식)</h2>
+    ${issuesTable}
+  </section>
+</body>
+</html>`;
+}
+
+export async function renderDataOverview() {
+  ensureDirs();
+  const input = loadInput();
+
+  // 전체 레코드
+  const all = input.records;
+
+  // 유효성 검사 및 로그
+  const issues: Array<{ SKU: string; issues: string[] }> = [];
+  const logPath = path.join(LOG_DIR, "data_visual_check.jsonl");
+  const logStream = fs.createWriteStream(logPath, { flags: "a", encoding: "utf-8" });
+  const nowIso = new Date().toISOString();
+
+  for (const r of all) {
+    const errs = validateRecord(r);
+    if (errs.length > 0) {
+      issues.push({ SKU: r.SKU, issues: errs });
+      logStream.write(JSON.stringify({ ts: nowIso, sku: r.SKU, issues: errs }) + "\n");
+    }
+  }
+  logStream.end();
+
+  // KPI 집계
+  const kpi = aggregateKPI(all);
+
+  // AUTO_GEN 필터
+  const autoGenRows = all.filter((r) => r.AutoGen === true);
+
+  // 렌더 큐 생성: 결손 자산이 많을수록 우선순위↑
+  const queue: RenderQueueItem[] = autoGenRows.map((r) => {
+    const lacks = validateRecord(r).filter((m) =>
+      ["Assets.refImages missing", "Assets.brandPalette missing", "Assets.logoRef missing"].includes(m)
+    ).length;
+    const priority = 100 - (lacks * 20); // 결손 많을수록 낮은 점수 → 뒤로
+    return {
+      SKU: r.SKU,
+      BrandCode: r.BrandCode,
+      StoryId: r.StoryId,
+      layoutHint: r.Prompts?.layout || "",
+      priority,
+    };
+  }).sort((a, b) => b.priority - a.priority);
+
+  // HTML 렌더
+  const html = renderHTML(kpi, issues, autoGenRows);
+  const htmlOut = path.join(REPORT_DIR, "data_overview.html");
+  fs.writeFileSync(htmlOut, html, "utf-8");
+
+  // JSON KPI
+  const jsonOut = path.join(REPORT_DIR, "data_overview.json");
+  writeJson(jsonOut, {
+    generatedAt: nowIso,
+    kpi,
+    issueCount: issues.length,
+  });
+
+  // 렌더 큐 저장
+  const queueOut = path.join(QUEUE_DIR, "figma_render_queue.json");
+  writeJson(queueOut, { generatedAt: nowIso, items: queue });
+
+  // 표준 출력
+  // eslint-disable-next-line no-console
+  console.log("[OK] Data overview generated:",
+    "\n -", htmlOut,
+    "\n -", jsonOut,
+    "\n -", queueOut,
+    "\n -", logPath
+  );
+}
+
+// CLI 실행 지원
+if (require.main === module) {
+  renderDataOverview().catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error("[FAIL] renderDataOverview:", err);
+    process.exit(1);
+  });
+}

@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    /* === 빌드 대상 환경 === */
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+
+    /* === 경로 및 출력 설정 === */
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",                /* 절대경로 import를 위해 추가 (선택사항) */
+    "paths": {
+      "@api/*": ["src/api/*"],
+      "@render/*": ["src/render/*"],
+      "@server/*": ["src/server/*"],
+      "@types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+
+    /* === 빌드 동작 제어 === */
+    "removeComments": true,
+    "noEmitOnError": true,
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "incremental": true,           /* 빌드 캐시로 재빌드 속도 향상 */
+    "skipDefaultLibCheck": true,   /* Render 환경에서 불필요한 타입체크 제거 */
+
+    /* === 호환성 및 타입 체크 === */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,                /* 프로덕션용 타입체크 강화 (기존 false → true) */
+
+    /* === 소스맵 옵션 (선택) === */
+    "sourceMap": false,            /* Render용 빌드엔 필요없음 */
+    "declaration": false           /* .d.ts 생성 비활성화 */
+  },
+
+  /* === 빌드 포함 경로 === */
+  "include": ["src/**/*"],
+
+  /* === 빌드 제외 경로 === */
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

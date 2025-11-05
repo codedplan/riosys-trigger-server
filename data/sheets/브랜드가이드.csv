@@ -1,0 +1,4 @@
+"브랜드코드","브랜드명","대표컬러(hex)","보조컬러(hex)","CTA컬러(hex)","폰트명","폰트웨이트기본","폰트사이즈기준","톤앤매너(문체)","비주얼톤(이미지)","LUT프리셋명","이미지톤가이드URL","로고URL","FigmaStyleID"
+"FP","팜플라우","#E5C882","#F5E9C6","#B8860B","Pretendard","400","16","감성형","내추럴","NaturalLight","https://brand.farmplow.kr/tone","https://brand.farmplow.kr/logo.svg","farmplow_main"
+"FR","프레시루트","#C8E5CC","#E2F7E7","#5EA86D","Pretendard","400","16","담백형","생동감있는","GreenTone","https://brand.freshroot.kr/tone","https://brand.freshroot.kr/logo.svg","freshroot_ui"
+"WF","우장프레시","#8FC9A3","#E5F2EA","#4FAF6D","Noto Sans KR","500","15","전문형","클린","ClearGreen","https://brand.woojungfresh.kr/tone","https://brand.woojungfresh.kr/logo.svg","woojung_main"

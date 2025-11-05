@@ -1,0 +1,50 @@
+[
+  {
+    "브랜드코드": "FP",
+    "브랜드명": "팜플라우",
+    "대표컬러(hex)": "#E5C882",
+    "보조컬러(hex)": "#F5E9C6",
+    "CTA컬러(hex)": "#B8860B",
+    "폰트명": "Pretendard",
+    "폰트웨이트기본": "400",
+    "폰트사이즈기준": "16",
+    "톤앤매너(문체)": "감성형",
+    "비주얼톤(이미지)": "내추럴",
+    "LUT프리셋명": "NaturalLight",
+    "이미지톤가이드URL": "https://brand.farmplow.kr/tone",
+    "로고URL": "https://brand.farmplow.kr/logo.svg",
+    "FigmaStyleID": "farmplow_main"
+  },
+  {
+    "브랜드코드": "FR",
+    "브랜드명": "프레시루트",
+    "대표컬러(hex)": "#C8E5CC",
+    "보조컬러(hex)": "#E2F7E7",
+    "CTA컬러(hex)": "#5EA86D",
+    "폰트명": "Pretendard",
+    "폰트웨이트기본": "400",
+    "폰트사이즈기준": "16",
+    "톤앤매너(문체)": "담백형",
+    "비주얼톤(이미지)": "생동감있는",
+    "LUT프리셋명": "GreenTone",
+    "이미지톤가이드URL": "https://brand.freshroot.kr/tone",
+    "로고URL": "https://brand.freshroot.kr/logo.svg",
+    "FigmaStyleID": "freshroot_ui"
+  },
+  {
+    "브랜드코드": "WF",
+    "브랜드명": "우장프레시",
+    "대표컬러(hex)": "#8FC9A3",
+    "보조컬러(hex)": "#E5F2EA",
+    "CTA컬러(hex)": "#4FAF6D",
+    "폰트명": "Noto Sans KR",
+    "폰트웨이트기본": "500",
+    "폰트사이즈기준": "15",
+    "톤앤매너(문체)": "전문형",
+    "비주얼톤(이미지)": "클린",
+    "LUT프리셋명": "ClearGreen",
+    "이미지톤가이드URL": "https://brand.woojungfresh.kr/tone",
+    "로고URL": "https://brand.woojungfresh.kr/logo.svg",
+    "FigmaStyleID": "woojung_main"
+  }
+]

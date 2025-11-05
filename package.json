@@ -1,0 +1,29 @@
+{
+  "name": "riosys-trigger-server",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server/triggerServer.js",
+    "dev": "nodemon --watch src --exec ts-node src/server/triggerServer.ts",
+    "merge": "npm run build && node dist/mergeBySKU.js",
+    "render:overview": "ts-node src/render/renderDataOverview.ts",
+    "render:overview:js": "node dist/render/renderDataOverview.js",
+    "overview": "npm run merge && npm run render:overview",
+    "server:trigger": "ts-node src/server/triggerServer.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "googleapis": "^164.1.0",
+    "ngrok": "^5.0.0-beta.2",
+    "papaparse": "^5.5.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.0",
+    "@types/papaparse": "^5.3.16",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

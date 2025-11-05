@@ -1,0 +1,8 @@
+{
+  "control_strength": 0.85,
+  "cfg": 7.3,
+  "sampler": "DPM++ 2M",
+  "steps": 28,
+  "sharpness": 0.6,
+  "ip_adapter": 0.5
+}
