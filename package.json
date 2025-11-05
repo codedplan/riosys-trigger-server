@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node dist/server/triggerServer.js",
+    "start": "npm run build && node --openssl-legacy-provider dist/server/triggerServer.js",
     "dev": "nodemon --watch src --exec ts-node src/server/triggerServer.ts",
     "merge": "npm run build && node dist/mergeBySKU.js",
     "render:overview": "ts-node src/render/renderDataOverview.ts",
