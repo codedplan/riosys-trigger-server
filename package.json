@@ -1,7 +1,6 @@
 {
   "name": "riosys-trigger-server",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/server/triggerServer.js",
