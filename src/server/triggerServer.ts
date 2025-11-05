@@ -5,7 +5,7 @@ import { execSync } from "child_process";
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.RIOSYS_TRIGGER_PORT || 3000;
+const PORT = process.env.PORT || process.env.RIOSYS_TRIGGER_PORT || 3000;
 const TOKEN = process.env.RIOSYS_TRIGGER_TOKEN;
 
 // ✅ any 타입 명시 (빌드 오류 방지용)
