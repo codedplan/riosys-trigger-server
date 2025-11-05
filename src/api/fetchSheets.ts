@@ -4,7 +4,7 @@
  * 결과: /data/sheets/*.json 저장
  * ===================================================================== */
 
-import "dotenv/config"; // ✅ .env 파일 로드 (GOOGLE_SHEET_ID 등 환경변수 사용 가능)
+import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { google } from "googleapis";
@@ -25,22 +25,26 @@ const SHEETS: SheetConfig[] = [
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const OUTPUT_DIR = path.resolve(process.cwd(), "data/sheets");
 
-// ✅ 환경변수 디버그 출력
-console.log("🔍 SPREADSHEET_ID:", SPREADSHEET_ID);
+// ✅ 환경변수 점검
 if (!SPREADSHEET_ID) {
-  throw new Error("환경변수 GOOGLE_SHEET_ID가 로드되지 않았습니다. .env 파일을 확인하세요.");
+  throw new Error("환경변수 GOOGLE_SHEET_ID가 누락되었습니다.");
+}
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  throw new Error("환경변수 GOOGLE_APPLICATION_CREDENTIALS_JSON이 누락되었습니다.");
 }
 
 async function fetchSheets() {
-  // ✅ Google 인증 초기화
+  // ✅ Render 환경용 Google 인증 초기화 (JSON 문자열 직접 파싱)
+  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON!);
   const auth = new google.auth.GoogleAuth({
+    credentials,
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
   });
+
   const sheets = google.sheets({ version: "v4", auth });
 
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  // ✅ 시트별 데이터 가져오기
   for (const sheet of SHEETS) {
     console.log(`📥 시트 요청 중: ${sheet.name}`);
     const res = await sheets.spreadsheets.values.get({
