@@ -15,12 +15,16 @@ const SHEETS = [
 ];
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const OUTPUT_DIR = path_1.default.resolve(process.cwd(), "data/sheets");
-console.log("🔍 SPREADSHEET_ID:", SPREADSHEET_ID);
 if (!SPREADSHEET_ID) {
-    throw new Error("환경변수 GOOGLE_SHEET_ID가 로드되지 않았습니다. .env 파일을 확인하세요.");
+    throw new Error("환경변수 GOOGLE_SHEET_ID가 누락되었습니다.");
+}
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    throw new Error("환경변수 GOOGLE_APPLICATION_CREDENTIALS_JSON이 누락되었습니다.");
 }
 async function fetchSheets() {
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
     const auth = new googleapis_1.google.auth.GoogleAuth({
+        credentials,
         scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
     });
     const sheets = googleapis_1.google.sheets({ version: "v4", auth });
